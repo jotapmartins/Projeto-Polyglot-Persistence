@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventFlow - Seus Eventos em um Só Lugar</title>
+  <link href="/public/css/telainicial.css" rel="stylesheet"> 
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+</head>
+
+<body>
+  <header class="header">
+    <a href="#" class="logo">
+      <i class="ph-fill ph-flow-arrow"></i> EVENTFLOW
+    </a>
+
+
+    <nav class="navigation">
+      <div class="nav-item">
+        <select>
+          <option>Todas cidades</option>
+          <option>São Paulo</option>
+          <option>Rio de Janeiro</option>
+          <option>Belo Horizonte</option>
+        </select>
+      </div>
+    </nav>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar Eventos">
+      <button><i class="ph ph-magnifying-glass"></i></button>
+    </div>
+
+    <div class="user-actions">
+      <button class="empresa-btn">Área Empresarial</button>
+      <i id="profileIcon" class="ph ph-user-circle"></i>
+    </div>
+  </header>
+
+    <div id="modalEventosConfirmados" class="modal">
+      <div class="modal-content">
+        <span id="closeModalConfirmados" class="close">&times;</span>
+        <h2>Meus Eventos Confirmados</h2>
+        <div id="listaEventosConfirmados" class="event-list">
+          <p style="text-align:center;color:#777;">Carregando...</p>
+        </div>
+      </div>
+    </div>
+
+  <main>
+    
+    <div class="hero-slider">
+      <div class="slide slide-1 active">
+        <div class="slide-content">
+          <h1>Encontre os Melhores Eventos</h1>
+          <p>Descubra experiências únicas e viva momentos inesquecíveis com o EventFlow.</p>
+        </div>
+      </div>
+      <div class="slide slide-2">
+        <div class="slide-content">
+          <h1>Festivais e Shows</h1>
+          <p>De grandes arenas a eventos intimistas, tudo está aqui.</p>
+        </div>
+      </div>
+      <div class="slide slide-3">
+        <div class="slide-content">
+          <h1>Teatro, Cultura e Arte</h1>
+          <p>Explore eventos culturais que inspiram e emocionam.</p>
+        </div>
+      </div>
+
+      <div class="slider-nav">
+        <button id="prev">&#10094;</button>
+        <button id="next">&#10095;</button>
+      </div>
+    </div>
+
+  <section class="event-gallery">
+  <h2 class="gallery-title">Eventos em Destaque</h2>
+  <div class="gallery-container">
+    <!-- Os eventos serão carregados dinamicamente aqui -->
+  </div>
+</section>
+
+  </main>
+
+    <div id="profileModal" class="modal">
+      <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Editar Perfil</h2>
+        <form id="profileForm">
+          <label>Nome:</label>
+          <input type="text" id="nome" placeholder="Seu nome">
+          <label>E-mail:</label>
+          <input type="email" id="email" placeholder="Seu e-mail">
+          <label>Senha:</label>
+          <input type="password" id="senha" placeholder="Sua senha">
+          <button type="button" onclick="salvarPerfil()">Salvar</button>
+        </form>
+      </div>
+    </div>
+
+  <aside id="profileSidebar" class="profile-sidebar">
+    <div class="sidebar-header">
+      <h2>Meu Perfil</h2>
+      <button id="closeSidebar" class="close-btn"><i class="ph ph-x"></i></button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" id="editProfileBtn" class="sidebar-link">
+        <i class="ph ph-user-circle-gear"></i> Editar Perfil
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="ph ph-ticket"></i> Eventos Confirmados
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logoutButton" onclick="sairSistema()" class="btn-logout">
+        <i class="ph ph-sign-out"></i> Sair
+      </button>
+    </div>
+  </aside>
+  
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+
+<script src="/public/js/telaInicial/functions.js?v=2"></script>
+<script src="/public/auth.js"></script>
+</body>
+</html>

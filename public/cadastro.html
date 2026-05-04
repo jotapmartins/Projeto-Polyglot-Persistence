@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - EventFlow</title>
+  <link rel="stylesheet" href="/public/css/cadastro.css">
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <h1>Crie sua conta na <span>EventFlow</span></h1>
+      <h2>Cadastro</h2>
+      <form id="cadastroForm">
+        <label>Nome completo</label>
+        <input type="text" id="nome" required>
+
+        <label>E-mail</label>
+        <input type="email" id="email" required>
+
+        <label>CPF</label>
+        <input type="number" id="cpf" required>
+
+        <label>Senha</label>
+        <input type="password" id="senha" required>
+
+        <label>Confirmar senha</label>
+        <input type="password" id="confirmar" required>
+
+        <button class="btn" type="submit">Cadastrar</button>
+      </form>
+  <!-- Notificação -->
+  <div id="notificacao" style="display:none; position:fixed; top:20px; right:20px; background:#4CAF50; color:white; padding:10px 20px; border-radius:6px;">
+    ✅ Cadastro realizado com sucesso!
+  </div>
+  </div>
+  <script src="/public/js/cadastro.js"></script>
+</body>
+</html>

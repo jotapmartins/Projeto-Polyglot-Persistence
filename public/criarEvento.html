@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Novo Evento - EventFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/@phosphor-icons/web" rel="stylesheet">
+  <link rel="stylesheet" href="/public/css/criarEvento.css">
+</head>
+
+<body>
+  <header class="header">
+    <a href="/public/empresa/dashboard.html" class="logo">
+      <i class="ph-fill ph-calendar-plus"></i> Criar Novo Evento
+    </a>
+  </header>
+
+  <main class="form-container">
+    <form id="formEvento" enctype="multipart/form-data">
+      <h2>Dados do Evento</h2>
+
+      <div class="form-group">
+        <label for="nome_evento">Nome do Evento *</label>
+        <input type="text" id="nome_evento" name="nome_evento" required>
+      </div>
+      <div class="linha">
+        <div class="form-group">
+            <label for="nome_evento">Endereço*</label>
+            <input type="text" id="end_evento" name="end_evento" style="width: 503px;" required>
+        </div>
+      </div>
+      <div class="linha">
+        <div class="form-group">
+            <label for="nome_evento">Nome do Local*</label>
+            <input type="text" id="nome_local_evento" name="nome_local_evento" style="width: 503px;" required>
+        </div>
+      </div>
+
+      <div class="linha">
+        <div class="form-group">
+            <label for="limite_pessoas">Limite de Pessoas *</label>
+            <input type="number" id="limite_pessoas" name="limite_pessoas" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="dt_evento">Data do Evento *</label>
+            <input type="date" id="dt_evento" name="dt_evento" required>
+        </div>
+        <div class="form-group">
+            <label for="vl_ingresso">R$ Ingresso </label>
+            <input type="number" style="width: 95px;" id="vl_ingresso" name="vl_ingresso" min="0" step="0.01" required>
+        </div>
+      </div>
+      <div class="linha">
+        <div class="form-group">
+          <label for="hr_inicio_evento">Horário de Início *</label>
+          <input type="time" id="hr_inicio_evento" name="hr_inicio_evento" required>
+        </div>
+        <div class="form-group">
+          <label for="hr_fim_evento">Horário de Término *</label>
+          <input type="time" id="hr_fim_evento" name="hr_fim_evento" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="link_doc_img">Imagem do Evento *</label>
+        <input type="file" id="link_doc_img" name="link_doc_img" accept="image/*" required>
+      </div>
+
+      <button type="submit" class="btn-enviar">
+        <i class="ph ph-check-circle"></i> Cadastrar Evento
+      </button>
+    </form>
+  </main>
+<script>
+    document.getElementById('formEvento').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // 1. Pega o codEmpresa do localStorage
+      const codEmpresa = localStorage.getItem('codEmpresaUser');
+
+      if (!codEmpresa) {
+        alert('❌ Erro: Empresa não encontrada. Faça o login novamente.');
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      // 2. Anexa o codEmpresa ao FormData
+      formData.append('cod_empresa', codEmpresa);
+      
+      // Desabilita o botão para evitar cliques duplos
+      const submitButton = form.querySelector('.btn-enviar');
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<i class="ph ph-spinner-gap"></i> Cadastrando...';
+
+      try {
+        const response = await fetch('http://45.89.30.194:3211/cadastrar-evento', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('✅ Evento cadastrado com sucesso!');
+          window.location.href = '/public/empresa/dashboard.html';
+        } else {
+          // Mostra o erro vindo do servidor
+          alert('❌ Erro: ' + data.message);
+        }
+      } catch (err) {
+        console.error('Erro ao enviar:', err);
+        alert('Erro de conexão ao cadastrar o evento.');
+      } finally {
+        // Reabilita o botão
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="ph ph-check-circle"></i> Cadastrar Evento';
+      }
+    });
+  </script>
+  <script src="/public/auth.js"></script>
+
+</body>
+</html>
