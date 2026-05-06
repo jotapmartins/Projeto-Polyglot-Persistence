@@ -8,9 +8,12 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 5521;
 
-// app.use(cors({
-//   origin: ['http://45.89.30.194:3211', 'http://127.0.0.1:3211']
-// }));
+const mongoose = require('mongoose');
+const connectMongo = require('./db/mongoConnection');
+const Empresa = require('./models/Empresa');
+
+// Chama a conexão com o MongoDB
+connectMongo();
 
 app.use(cors({ origin: '*' }));
 
@@ -317,7 +320,8 @@ app.post('/login', (req, res) => {
 
 
 //Funcao para cadastrar uma empresa vinculando a um usuario
-app.post('/cadastrar-empresa', (req, res) => {
+// Cadastrar empresa no MongoDB
+app.post('/cadastrar-empresa', async (req, res) => {
   const {
     nome_fantasia,
     cnpj,
@@ -334,61 +338,57 @@ app.post('/cadastrar-empresa', (req, res) => {
   } = req.body;
 
   if (!nome_fantasia || !cnpj || !cod_colaborador) {
-    return res.status(400).json({ message: 'Campos principais (Nome Fantasia, CNPJ e Usuário) são obrigatórios.' });
+    return res.status(400).json({
+      message: 'Campos principais (Nome Fantasia, CNPJ e Usuário) são obrigatórios.'
+    });
   }
 
-  const sqlEmpresa = `
-    INSERT INTO cd_empresas (
-      desc_comercial, cnpj, cod_colaborador, razao_social, telefone, 
-      cep, logradouro, numero, complemento, bairro, cidade, estado
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-  
-  const valores = [
-    nome_fantasia, cnpj, cod_colaborador, razao_social, telefone,
-    cep, logradouro, numero, complemento, bairro, cidade, estado
-  ];
-
-  db.query(sqlEmpresa, valores, (err, result) => {
-    if (err) {
-      console.error('Erro ao inserir empresa no DB:', err);
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ message: 'Este CNPJ já está cadastrado.' });
-      }
-      return res.status(500).json({ message: 'Erro interno ao salvar a empresa.' });
+  try {
+    // Verifica se CNPJ já existe no MongoDB
+    const jaExiste = await Empresa.findOne({ cnpj });
+    if (jaExiste) {
+      return res.status(409).json({ message: 'Este CNPJ já está cadastrado.' });
     }
-    
-    // Sucesso!
-    res.status(201).json({ 
-      message: 'Empresa cadastrada com sucesso!',
-      empresaId: result.insertId 
+
+    const novaEmpresa = new Empresa({
+      cod_colaborador,
+      razao_social,
+      desc_comercial: nome_fantasia,
+      cnpj,
+      telefone,
+      endereco: { cep, logradouro, numero, complemento, bairro, cidade, estado }
     });
-  });
+
+    const salva = await novaEmpresa.save();
+
+    res.status(201).json({
+      message: '✅ Empresa cadastrada com sucesso no MongoDB!',
+      empresaId: salva._id
+    });
+
+  } catch (err) {
+    console.error('❌ Erro ao cadastrar empresa no MongoDB:', err);
+    res.status(500).json({ message: 'Erro interno ao salvar a empresa.' });
+  }
 });
 
 
 //Verifica se o usuario tem uma empresa cadastrada
-app.get('/verificar-empresa/:cod_user', (req, res) => {
+app.get('/verificar-empresa/:cod_user', async (req, res) => {
   const { cod_user } = req.params;
 
-  if (!cod_user) {
-    return res.status(400).json({ message: 'ID do usuário não fornecido.' });
-  }
+  try {
+    const empresa = await Empresa.findOne({ cod_colaborador: Number(cod_user) });
 
-  const sql = 'SELECT cod_empresa FROM cd_empresas WHERE cod_colaborador = ? LIMIT 1';
-
-  db.query(sql, [cod_user], (err, results) => {
-    if (err) {
-      console.error('Erro ao verificar empresa:', err);
-      return res.status(500).json({ message: 'Erro interno no servidor.' });
-    }
-
-    if (results.length > 0) {
-      return res.status(200).json({ temEmpresa: true });
+    if (empresa) {
+      return res.status(200).json({ temEmpresa: true, cod_empresa: empresa._id });
     } else {
       return res.status(200).json({ temEmpresa: false });
     }
-  });
+  } catch (err) {
+    console.error('Erro ao verificar empresa:', err);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
+  }
 });
 
 // Confirmar Presença em Evento

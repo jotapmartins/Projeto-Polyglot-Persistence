@@ -95,7 +95,7 @@
       submitButton.innerHTML = '<i class="ph ph-spinner-gap"></i> Cadastrando...';
 
       try {
-        const response = await fetch('http://45.89.30.194:3211/cadastrar-evento', {
+        const response = await fetch('http://localhost:5521/cadastrar-evento', {
           method: 'POST',
           body: formData
         });

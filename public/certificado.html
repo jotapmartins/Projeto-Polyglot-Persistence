@@ -190,7 +190,7 @@ body {
 
   // (Opcional) bloqueia se não tiver confirmação no banco
   try {
-    const chk = await fetch(`http://45.89.30.194:3211/presencas/checar?cod_user=${info.cod_user}&cod_evento=${info.cod_evento}`);
+    const chk = await fetch(`http://localhost:5521/presencas/checar?cod_user=${info.cod_user}&cod_evento=${info.cod_evento}`);
     const ok = await chk.json();
     if (!ok.ok) {
       // Se quiser liberar mesmo sem checar, remova este bloco
@@ -202,7 +202,7 @@ body {
   // 2) Busca os dados do evento
   let evento = null;
   try {
-    const r = await fetch(`http://45.89.30.194:3211/eventos/${info.cod_evento}`);
+    const r = await fetch(`http://localhost:5521/eventos/${info.cod_evento}`);
     evento = await r.json();
   } catch (e) {
     console.error(e);

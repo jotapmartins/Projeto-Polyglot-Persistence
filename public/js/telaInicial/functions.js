@@ -86,7 +86,7 @@ empresaBtn.addEventListener('click', async () => {
   }
 
   try {
-    const resposta = await fetch(`http://45.89.30.194:3211/verificar-empresa/${codColaborador}`, {
+    const resposta = await fetch(`http://localhost:5521/verificar-empresa/${codColaborador}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -123,7 +123,7 @@ async function carregarEventosGerais() {
   container.innerHTML = '<p style="text-align:center;color:#aaa;">Carregando eventos...</p>';
 
   try {
-    const response = await fetch('http://45.89.30.194:3211/eventos-geral');
+    const response = await fetch('http://localhost:5521/eventos-geral');
     const data = await response.json();
     container.innerHTML = '';
     eventosCache = data;
@@ -137,7 +137,7 @@ async function carregarEventosGerais() {
     let eventosConfirmados = [];
     const usuario = JSON.parse(localStorage.getItem('usuario'));
     if (usuario?.cod_user) {
-      const presencasResponse = await fetch(`http://45.89.30.194:3211/presencas/${usuario.cod_user}`);
+      const presencasResponse = await fetch(`http://localhost:5521/presencas/${usuario.cod_user}`);
       if (presencasResponse.ok) {
         const presencas = await presencasResponse.json();
         eventosConfirmados = presencas.map(p => p.cod_evento);
@@ -200,7 +200,7 @@ function renderizarEventos(lista, confirmados = []) {
         }
 
         try {
-          const res = await fetch('http://45.89.30.194:3211/confirmar-presenca', {
+          const res = await fetch('http://localhost:5521/confirmar-presenca', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -307,7 +307,7 @@ async function abrirModalEventosConfirmados() {
   listaEventosConfirmados.innerHTML = '<p style="text-align:center;color:#aaa;">Carregando...</p>';
 
   try {
-    const res = await fetch(`http://45.89.30.194:3211/eventos-confirmados/${usuario.cod_user}`);
+    const res = await fetch(`http://localhost:5521/eventos-confirmados/${usuario.cod_user}`);
     const data = await res.json();
 
     listaEventosConfirmados.innerHTML = '';
@@ -353,7 +353,7 @@ async function cancelarPresenca(cod_evento) {
   if (!usuario?.cod_user) return;
 
   try {
-    const res = await fetch('http://45.89.30.194:3211/cancelar-presenca', {
+    const res = await fetch('http://localhost:5521/cancelar-presenca', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -407,7 +407,7 @@ async function salvarPerfil() {
   }
 
   try {
-    const response = await fetch(`http://45.89.30.194:3211/atualizar-usuario/${usuario.cod_user}`, {
+    const response = await fetch(`http://localhost:5521/atualizar-usuario/${usuario.cod_user}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
