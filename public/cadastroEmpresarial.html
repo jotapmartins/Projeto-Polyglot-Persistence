@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventFlow - Cadastro Empresarial</title>
+  <link href="/public/css/cadastro_empresa.css" rel="stylesheet"> 
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+  <div class="main-container">
+    <div class="form-container">
+      
+      <a href="telainicial.html" class="logo">
+        <i class="ph-fill ph-flow-arrow"></i> EVENTFLOW
+      </a>
+      <h1>Cadastro Empresarial</h1>
+      <p class="subtitle">Cadastre sua empresa para começar a criar eventos</p>
+
+      <form id="empresaForm">
+        
+        <fieldset>
+          <h2><i class="ph ph-buildings"></i> Dados da Empresa</h2>
+          <div class="form-grid">
+            <div class="input-group full-width">
+              <label for="razao_social">Razão Social:</label>
+              <input type="text" id="razao_social" name="razao_social" placeholder="Ex: EventFlow Produções LTDA" required>
+            </div>
+            <div class="input-group full-width">
+              <label for="nome_fantasia">Nome Fantasia (desc_comercial):</label>
+              <input type="text" id="nome_fantasia" name="nome_fantasia" placeholder="Ex: EventFlow" required>
+            </div>
+            <div class="input-group">
+              <label for="cnpj">CNPJ:</label>
+              <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0001-00" maxlength="18" required>
+            </div>
+            <div class="input-group">
+              <label for="telefone">Telefone Comercial:</label>
+              <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <h2><i class="ph ph-map-pin"></i>Endereço da Sede</h2>
+          <div class="form-grid">
+            <div class="input-group">
+              <label for="cep">CEP:</label>
+              <input type="text" id="cep" name="cep" placeholder="00000-000" maxlength="9" required>
+            </div>
+            <div class="input-group full-width">
+              <label for="logradouro">Logradouro (Rua/Avenida):</label>
+              <input type="text" id="logradouro" name="logradouro" required>
+            </div>
+            <div class="input-group">
+              <label for="numero">Número:</label>
+              <input type="text" id="numero" name="numero" required>
+            </div>
+            <div class="input-group">
+              <label for="complemento">Complemento:</label>
+              <input type="text" id="complemento" name="complemento" placeholder="Sala 1, Bloco A...">
+            </div>
+            <div class="input-group">
+              <label for="bairro">Bairro:</label>
+              <input type="text" id="bairro" name="bairro" required>
+            </div>
+            <div class="input-group">
+              <label for="cidade">Cidade:</label>
+              <input type="text" id="cidade" name="cidade" required>
+            </div>
+            <div class="input-group">
+              <label for="estado">Estado (UF):</label>
+              <select id="estado" name="estado" required>
+                <option value="">Selecione</option>
+                <option value="SP">São Paulo</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-submit">Finalizar Cadastro</button>
+        <a href="/public/telaInicial.html" class="back-link">Voltar para a Home</a>
+
+      </form>
+    </div>
+  </div>
+
+  <script src="/public/js/Empresas/cadEmpresa.js"></script>
+  <script src="/public/auth.js"></script>
+
+</body>
+</html>

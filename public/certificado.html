@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Certificado de Participação - EventFlow</title>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wrap {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.toolbar {
+  width: 210mm;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 16px 0;
+}
+.toolbar button {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+}
+.toolbar button.secondary {
+  background: #0f172a;
+}
+
+.certificado {
+  width: 210mm;
+  height: 297mm;
+  background: #fff;
+  border: 6px solid #1d4ed8;
+  outline: 3px solid #93c5fd;
+  box-shadow: 0 0 12px rgba(0, 0, 0, .15);
+  padding: 25mm 20mm;
+  position: relative;
+  overflow: hidden;
+}
+
+.cabecalho {
+  text-align: center;
+  margin-bottom: 18mm;
+}
+.cabecalho h1 {
+  margin: 0;
+  font-size: 40px;
+  color: #1d4ed8;
+  letter-spacing: 2px;
+}
+.cabecalho p {
+  margin: 6px 0 0;
+  color: #555;
+}
+
+.conteudo {
+  text-align: center;
+  max-width: 90%;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+.conteudo p {
+  font-size: 18px;
+  color: #333;
+  margin: 6px 0;
+}
+
+.nome-participante {
+  display: block;
+  width: fit-content;
+  margin: 10mm auto 6mm;
+  padding-bottom: 4px;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #111;
+  border-bottom: 2px solid #1d4ed8;
+}
+
+.evento { color: #1d4ed8; font-weight: 600; }
+
+.data-local { margin-top: 10mm; color: #555; }
+
+.rodape {
+  position: absolute;
+  bottom: 22mm;
+  left: 0;
+  width: 100%;
+}
+
+.assinaturas {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+}
+.assinatura { flex: 1; }
+.linha {
+  width: 160px;
+  border-top: 1.8px solid #222;
+  margin: 0 auto 6px;
+}
+.assinatura small { color: #777; display: block; }
+
+@media print {
+  @page { size: A4; margin: 0; } /* Remove margens automáticas */
+  body { background: #fff; }
+  .toolbar { display: none; }
+  .certificado {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    border: 5px solid #1d4ed8;
+    outline: 3px solid #93c5fd;
+    box-shadow: none;
+    page-break-after: avoid;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="secondary" onclick="history.back()">Voltar</button>
+    <button onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <div class="certificado" id="certificado">
+
+    <div class="cabecalho">
+      <h1>CERTIFICADO DE PARTICIPAÇÃO</h1>
+      <p>Reconhecimento oficial de presença e engajamento</p>
+    </div>
+
+    <div class="conteudo">
+      <p>Certificamos que</p>
+      <span class="nome-participante" id="nomeParticipante">—</span>
+      <p>participou do evento <span class="evento" id="nomeEvento">—</span>,</p>
+      <p>realizado em <strong id="cidadeUF">—</strong> no dia <strong id="dataEvento">—</strong>.</p>
+      <div class="data-local">
+        <p>Emitido em <strong id="dataEmissao">—</strong></p>
+      </div>
+    </div>
+
+    <div class="rodape">
+      <div class="assinaturas">
+        <div class="assinatura">
+          <div class="linha"></div>
+          <p><strong>Coordenação Geral</strong></p>
+          <small>EventFlow</small>
+        </div>
+        <div class="assinatura">
+          <div class="linha"></div>
+          <p><strong>Organização do Evento</strong></p>
+          <small>Empresa Responsável</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async () => {
+  // 1) Lê dados salvos ao clicar em "Gerar Certificado"
+  const info = JSON.parse(localStorage.getItem('certificado_info') || '{}');
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+
+  if (!info.cod_evento) {
+    alert('Informações do certificado não encontradas.');
+    return;
+  }
+
+  // (Opcional) bloqueia se não tiver confirmação no banco
+  try {
+    const chk = await fetch(`http://localhost:5521/presencas/checar?cod_user=${info.cod_user}&cod_evento=${info.cod_evento}`);
+    const ok = await chk.json();
+    if (!ok.ok) {
+      // Se quiser liberar mesmo sem checar, remova este bloco
+      // alert('Presença não confirmada para este evento.');
+      // return;
+    }
+  } catch (_) {}
+
+  // 2) Busca os dados do evento
+  let evento = null;
+  try {
+    const r = await fetch(`http://localhost:5521/eventos/${info.cod_evento}`);
+    evento = await r.json();
+  } catch (e) {
+    console.error(e);
+  }
+
+  // 3) Preenche campos
+  const nomeParticipante = usuario?.nome_user || info?.nome_user || 'Participante';
+  const nomeEvento = evento?.nome_evento || 'Evento';
+  const cidade = evento?.cidade || evento?.end_evento || '—';
+  const dtEvento = evento?.dt_evento ? new Date(evento.dt_evento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—';
+  const dtEmissao = new Date().toLocaleDateString('pt-BR');
+
+  document.getElementById('nomeParticipante').textContent = nomeParticipante;
+  document.getElementById('nomeEvento').textContent = nomeEvento;
+  document.getElementById('cidadeUF').textContent = cidade;
+  document.getElementById('dataEvento').textContent = dtEvento;
+  document.getElementById('dataEmissao').textContent = dtEmissao;
+})();
+</script>
+</body>
+</html>
