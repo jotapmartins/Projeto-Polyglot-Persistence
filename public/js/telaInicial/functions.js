@@ -86,20 +86,15 @@ empresaBtn.addEventListener('click', async () => {
   }
 
   try {
-    const resposta = await fetch(`http://localhost:5521/verificar-empresa/${codColaborador}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resposta = await fetch(`http://localhost:5521/verificar-empresa/${codColaborador}`);
 
-    if (!resposta.ok) {
-      throw new Error('Não foi possível verificar os dados da empresa.');
-    }
+    if (!resposta.ok) throw new Error('Não foi possível verificar os dados da empresa.');
 
     const data = await resposta.json();
 
     if (data.temEmpresa) {
+      // ✅ Salva o _id do MongoDB no localStorage antes de redirecionar
+      localStorage.setItem('cod_empresa', data.cod_empresa);
       window.location.href = '/public/dashEstabelecimento.html';
     } else {
       window.location.href = '/public/cadastroEmpresarial.html';

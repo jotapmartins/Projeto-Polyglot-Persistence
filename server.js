@@ -15,6 +15,10 @@ const Empresa = require('./models/Empresa');
 // Chama a conexão com o MongoDB
 connectMongo();
 
+const { client: cassandra, connectCassandra } = require('./db/cassandraConnection');
+
+connectCassandra();
+
 app.use(cors({ origin: '*' }));
 
 
@@ -84,70 +88,144 @@ const upload = multer({
 
 // ----------------------------------------------------
 //Cadastrar Evento
-app.post('/cadastrar-evento', upload.none(), (req, res) => {
+// app.post('/cadastrar-evento', upload.none(), (req, res) => {
+//   try {
+//     const {
+//       nome_evento,
+//       end_evento,
+//       nome_local_evento,
+//       limite_pessoas,
+//       dt_evento,
+//       vl_ingresso,
+//       hr_inicio_evento,
+//       hr_fim_evento,
+//       cod_empresa,
+//       cidade,
+//       link_imagem
+//     } = req.body;
+
+//     if (!cod_empresa) {
+//       return res.status(400).json({
+//         message: 'Erro: Código da empresa não encontrado. Faça login novamente.'
+//       });
+//     }
+
+//     const sql = `
+//       INSERT INTO cd_eventos (
+//         cod_empresa, nome_evento, end_evento, nome_local_evento, 
+//         limite_pessoas, dt_evento, vl_ingresso, hr_inicio_evento, 
+//         hr_fim_evento, cidade, link_imagem
+//       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+//     `;
+
+//     const valores = [
+//       cod_empresa,
+//       nome_evento,
+//       end_evento,
+//       nome_local_evento,
+//       limite_pessoas,
+//       dt_evento,
+//       vl_ingresso,
+//       hr_inicio_evento,
+//       hr_fim_evento,
+//       cidade,
+//       link_imagem
+//     ];
+
+//     db.query(sql, valores, (err, result) => {
+//       if (err) {
+//         console.error('❌ Erro ao cadastrar evento:', err);
+//         return res.status(500).json({ message: 'Erro interno ao salvar o evento.' });
+//       }
+
+//       res.status(201).json({
+//         message: '✅ Evento cadastrado com sucesso!',
+//         eventoId: result.insertId
+//       });
+//     });
+//   } catch (error) {
+//     console.error('❌ Erro no endpoint /cadastrar-evento:', error);
+//     res.status(500).json({ message: 'Erro interno do servidor.' });
+//   }
+// });
+
+app.post('/cadastrar-evento', upload.none(), async (req, res) => {
   try {
     const {
-      nome_evento,
-      end_evento,
-      nome_local_evento,
-      limite_pessoas,
-      dt_evento,
-      vl_ingresso,
-      hr_inicio_evento,
-      hr_fim_evento,
-      cod_empresa,
-      cidade,
-      link_imagem
+      nome_evento, end_evento, nome_local_evento, limite_pessoas,
+      dt_evento, vl_ingresso, hr_inicio_evento, hr_fim_evento,
+      cod_empresa, cidade, link_imagem
     } = req.body;
 
     if (!cod_empresa) {
-      return res.status(400).json({
-        message: 'Erro: Código da empresa não encontrado. Faça login novamente.'
-      });
+      return res.status(400).json({ message: 'Código da empresa não informado.' });
     }
 
-    const sql = `
-      INSERT INTO cd_eventos (
-        cod_empresa, nome_evento, end_evento, nome_local_evento, 
-        limite_pessoas, dt_evento, vl_ingresso, hr_inicio_evento, 
-        hr_fim_evento, cidade, link_imagem
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    // Gerar um código simples para o evento (baseado em timestamp)
+    const cod_evento = Date.now();
+
+    const query = `
+      INSERT INTO eventflow_db.eventos 
+      (cod_empresa, cod_evento, nome_evento, end_evento, nome_local_evento, 
+       limite_pessoas, dt_evento, vl_ingresso, hr_inicio_evento, hr_fim_evento, 
+       cidade, link_imagem)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const valores = [
-      cod_empresa,
-      nome_evento,
-      end_evento,
+    await cassandra.execute(query, [
+      parseInt(cod_empresa),
+      cod_evento, 
+      nome_evento, 
+      end_evento, 
       nome_local_evento,
-      limite_pessoas,
-      dt_evento,
-      vl_ingresso,
-      hr_inicio_evento,
-      hr_fim_evento,
-      cidade,
+      parseInt(limite_pessoas), 
+      dt_evento, 
+      parseFloat(vl_ingresso), 
+      hr_inicio_evento, 
+      hr_fim_evento, 
+      cidade, 
       link_imagem
-    ];
+    ], { prepare: true });
 
-    db.query(sql, valores, (err, result) => {
-      if (err) {
-        console.error('❌ Erro ao cadastrar evento:', err);
-        return res.status(500).json({ message: 'Erro interno ao salvar o evento.' });
-      }
+    res.status(201).json({ message: '✅ Evento cadastrado com sucesso!', eventoId: cod_evento });
 
-      res.status(201).json({
-        message: '✅ Evento cadastrado com sucesso!',
-        eventoId: result.insertId
-      });
-    });
   } catch (error) {
-    console.error('❌ Erro no endpoint /cadastrar-evento:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error('❌ Erro ao cadastrar evento:', error);
+    res.status(500).json({ message: 'Erro interno ao salvar o evento.' });
   }
 });
 
 
 //Lista evento conforme empresa
-app.post('/eventos', (req, res) => {
+// app.post('/eventos', (req, res) => {
+//   try {
+//     const { cod_empresa } = req.body;
+
+//     if (!cod_empresa) {
+//       return res.status(400).json({ message: 'Código da empresa não informado.' });
+//     }
+
+//     const sql = 'SELECT * FROM cd_eventos WHERE cod_empresa = ?';
+
+//     db.query(sql, [cod_empresa], (err, results) => {
+//       if (err) {
+//         console.error('❌ Erro ao buscar eventos:', err);
+//         return res.status(500).json({ message: 'Erro interno ao consultar eventos.' });
+//       }
+
+//       if (results.length === 0) {
+//         return res.status(404).json({ message: 'Nenhum evento encontrado para esta empresa.' });
+//       }
+
+//       res.status(200).json(results);
+//     });
+//   } catch (error) {
+//     console.error('❌ Erro no endpoint /eventos:', error);
+//     res.status(500).json({ message: 'Erro interno do servidor.' });
+//   }
+// });
+
+app.post('/eventos', async (req, res) => {
   try {
     const { cod_empresa } = req.body;
 
@@ -155,73 +233,103 @@ app.post('/eventos', (req, res) => {
       return res.status(400).json({ message: 'Código da empresa não informado.' });
     }
 
-    const sql = 'SELECT * FROM cd_eventos WHERE cod_empresa = ?';
+    const query = `SELECT * FROM eventflow_db.eventos WHERE cod_empresa = ?`;
+    const result = await cassandra.execute(query, [parseInt(cod_empresa)], { prepare: true });
 
-    db.query(sql, [cod_empresa], (err, results) => {
-      if (err) {
-        console.error('❌ Erro ao buscar eventos:', err);
-        return res.status(500).json({ message: 'Erro interno ao consultar eventos.' });
-      }
+    if (result.rowLength === 0) {
+      return res.status(404).json({ message: 'Nenhum evento encontrado para esta empresa.' });
+    }
 
-      if (results.length === 0) {
-        return res.status(404).json({ message: 'Nenhum evento encontrado para esta empresa.' });
-      }
-
-      res.status(200).json(results);
-    });
+    res.status(200).json(result.rows);
   } catch (error) {
-    console.error('❌ Erro no endpoint /eventos:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error('❌ Erro ao buscar eventos:', error);
+    res.status(500).json({ message: 'Erro interno ao consultar eventos.' });
   }
 });
 
 
 // EXCLUIR EVENTO
-app.delete('/excluir-evento', (req, res) => {
-  const { cod_evento } = req.body;
+// app.delete('/excluir-evento', (req, res) => {
+//   const { cod_evento } = req.body;
 
-  if (!cod_evento) {
-    return res.status(400).json({ message: 'Código do evento não informado.' });
-  }
+//   if (!cod_evento) {
+//     return res.status(400).json({ message: 'Código do evento não informado.' });
+//   }
 
-  const sql = 'DELETE FROM cd_eventos WHERE cod_evento = ?';
+//   const sql = 'DELETE FROM cd_eventos WHERE cod_evento = ?';
 
-  db.query(sql, [cod_evento], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao excluir evento:', err);
-      return res.status(500).json({ message: 'Erro interno ao excluir o evento.' });
+//   db.query(sql, [cod_evento], (err, result) => {
+//     if (err) {
+//       console.error('❌ Erro ao excluir evento:', err);
+//       return res.status(500).json({ message: 'Erro interno ao excluir o evento.' });
+//     }
+
+//     if (result.affectedRows === 0) {
+//       return res.status(404).json({ message: 'Evento não encontrado.' });
+//     }
+
+//     res.status(200).json({ message: 'Evento excluído com sucesso!' });
+//   });
+// });
+
+app.delete('/excluir-evento', async (req, res) => {
+  try {
+    const { cod_evento, cod_empresa } = req.body;
+
+    if (!cod_evento || !cod_empresa) {
+      return res.status(400).json({ message: 'Código do evento e da empresa são obrigatórios.' });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Evento não encontrado.' });
-    }
-
+    const query = `DELETE FROM eventflow_db.eventos WHERE cod_empresa = ? AND cod_evento = ?`;
+    await cassandra.execute(query, [parseInt(cod_empresa), parseInt(cod_evento)], { prepare: true });
+    
     res.status(200).json({ message: 'Evento excluído com sucesso!' });
-  });
+  } catch (error) {
+    console.error('❌ Erro ao excluir evento:', error);
+    res.status(500).json({ message: 'Erro interno ao excluir o evento.' });
+  }
 });
 
-
 // LISTAR TODOS OS EVENTOS
-app.get('/eventos-geral', (req, res) => {
-  const sql = 'SELECT * FROM cd_eventos';
+// app.get('/eventos-geral', (req, res) => {
+//   const sql = 'SELECT * FROM cd_eventos';
 
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar eventos:', err);
-      return res.status(500).json({ message: 'Erro interno ao buscar eventos.' });
-    }
+//   db.query(sql, (err, results) => {
+//     if (err) {
+//       console.error('❌ Erro ao buscar eventos:', err);
+//       return res.status(500).json({ message: 'Erro interno ao buscar eventos.' });
+//     }
 
-    // Imagem padrão
+//     // Imagem padrão
+//     const imagemPadrao = 'https://cdn-icons-png.flaticon.com/512/2748/2748558.png';
+
+//     // Substitui NULL por imagem padrão
+//     const eventos = results.map(ev => ({
+//       ...ev,
+//       link_imagem: ev.link_imagem || imagemPadrao
+//     }));
+
+//     res.status(200).json(eventos);
+//   });
+// });
+
+app.get('/eventos-geral', async (req, res) => {
+  try {
+    // Busca todos os eventos (pode ser pesado em produção)
+    const query = `SELECT * FROM eventflow_db.eventos`;
+    const result = await cassandra.execute(query);
+
     const imagemPadrao = 'https://cdn-icons-png.flaticon.com/512/2748/2748558.png';
-
-    // Substitui NULL por imagem padrão
-    const eventos = results.map(ev => ({
+    const eventos = result.rows.map(ev => ({
       ...ev,
       link_imagem: ev.link_imagem || imagemPadrao
     }));
 
     res.status(200).json(eventos);
-  });
+  } catch (error) {
+    console.error('❌ Erro ao buscar eventos:', error);
+    res.status(500).json({ message: 'Erro interno ao buscar eventos.' });
+  }
 });
 
 //Função de cadastrar o usuario
@@ -319,7 +427,6 @@ app.post('/login', (req, res) => {
 });
 
 
-//Funcao para cadastrar uma empresa vinculando a um usuario
 // Cadastrar empresa no MongoDB
 app.post('/cadastrar-empresa', async (req, res) => {
   const {
@@ -344,7 +451,6 @@ app.post('/cadastrar-empresa', async (req, res) => {
   }
 
   try {
-    // Verifica se CNPJ já existe no MongoDB
     const jaExiste = await Empresa.findOne({ cnpj });
     if (jaExiste) {
       return res.status(409).json({ message: 'Este CNPJ já está cadastrado.' });
@@ -381,7 +487,10 @@ app.get('/verificar-empresa/:cod_user', async (req, res) => {
     const empresa = await Empresa.findOne({ cod_colaborador: Number(cod_user) });
 
     if (empresa) {
-      return res.status(200).json({ temEmpresa: true, cod_empresa: empresa._id });
+      return res.status(200).json({ 
+        temEmpresa: true, 
+        cod_empresa: empresa.cod_colaborador // ✅ número inteiro, não o _id
+      });
     } else {
       return res.status(200).json({ temEmpresa: false });
     }
@@ -400,7 +509,6 @@ app.post('/confirmar-presenca', async (req, res) => {
   }
 
   try {
-    // Verifica se já confirmou presença
     const [existe] = await db
       .promise()
       .query(
@@ -412,7 +520,6 @@ app.post('/confirmar-presenca', async (req, res) => {
       return res.status(400).json({ sucesso: false, msg: 'Você já confirmou presença neste evento.' });
     }
 
-    // Insere nova confirmação
     await db
       .promise()
       .query(

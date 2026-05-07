@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-      const codEmpresa = usuario.cod_empresa;
+      const codEmpresa = localStorage.getItem('cod_empresa');
 
       if (!codEmpresa) {
         alert('❌ Erro: Empresa não encontrada. Faça o login novamente.');
@@ -81,8 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function carregarTabelaEventos() {
   try {
-    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-    const codEmpresa = usuario.cod_empresa;
+    const codEmpresa = localStorage.getItem('cod_empresa');
 
     if (!codEmpresa) {
       console.error('❌ Código da empresa não encontrado no localStorage.');
@@ -134,18 +133,25 @@ function formatarData(dataStr) {
 async function excluirEvento(cod_evento) {
   if (!confirm('Deseja realmente excluir este evento?')) return;
 
+  const codEmpresa = localStorage.getItem('cod_empresa');
+
+  if (!codEmpresa) {
+    alert('❌ Erro: Empresa não encontrada. Faça o login novamente.');
+    return;
+  }
+
   try {
     const response = await fetch('http://localhost:5521/excluir-evento', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cod_evento })
+      body: JSON.stringify({ cod_evento, cod_empresa: codEmpresa })
     });
 
     const data = await response.json();
 
     if (response.ok) {
       alert('✅ Evento excluído com sucesso!');
-      carregarTabelaEventos(); // atualiza a tabela
+      carregarTabelaEventos();
     } else {
       alert('❌ Erro: ' + (data.message || 'Falha ao excluir evento.'));
     }
