@@ -574,3 +574,64 @@
 .event-item button:hover {
   background: #ff6633;
 }
+
+/* MODAL EVENTOS CONFIRMADOS */
+#modalEventosConfirmados .modal-content {
+  margin: 8% auto;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#modalEventosConfirmados .modal-content h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#listaEventosConfirmados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.event-item {
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+
+.event-item strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+}
+
+.event-item small {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.event-item button {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.event-item button:hover {
+  background: rgba(255, 107, 107, 0.1);
+}

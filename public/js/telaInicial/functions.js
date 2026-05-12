@@ -55,10 +55,9 @@ editProfileBtn.onclick = (e) => {
 
 close.onclick = () => modal.style.display = 'none';
 
-window.onclick = (e) => { 
-  if (e.target == modal) {
-    modal.style.display = 'none'; 
-  }
+window.onclick = (e) => {
+  if (e.target === modal) modal.style.display = 'none';
+  if (e.target === modalConfirmados) modalConfirmados.style.display = 'none';
 };
 
 
@@ -205,13 +204,14 @@ function renderizarEventos(lista, confirmados = []) {
           });
 
           const data = await res.json();
+
+        if (data.sucesso) {
+          salvarEventoConfirmadoSession(evento); // ← só salva se realmente confirmou
           alert(data.msg);
           window.location.reload();
-
-          if (data.sucesso) {
-            botao.textContent = 'Emitir Certificado 🎓';
-            botao.disabled = true;
-          }
+        } else {
+          alert(data.msg || 'Não foi possível confirmar presença.');
+        }
         } catch (err) {
           console.error('Erro ao confirmar presença:', err);
           alert('Erro ao confirmar presença. Tente novamente.');
@@ -287,9 +287,7 @@ closeModalConfirmados.onclick = () => {
   modalConfirmados.style.display = 'none';
 };
 
-window.onclick = (e) => {
-  if (e.target === modalConfirmados) modalConfirmados.style.display = 'none';
-};
+
 
 async function abrirModalEventosConfirmados() {
   const usuario = JSON.parse(localStorage.getItem('usuario'));
@@ -301,42 +299,27 @@ async function abrirModalEventosConfirmados() {
   modalConfirmados.style.display = 'block';
   listaEventosConfirmados.innerHTML = '<p style="text-align:center;color:#aaa;">Carregando...</p>';
 
+  // Tenta usar cache do sessionStorage primeiro
+  const cache = JSON.parse(sessionStorage.getItem('eventos_confirmados') || '[]');
+
+  if (cache.length > 0) {
+    renderizarEventosConfirmados(cache);
+    return;
+  }
+
+  // Sem cache: busca no backend e salva no sessionStorage
   try {
     const res = await fetch(`http://localhost:5521/eventos-confirmados/${usuario.cod_user}`);
     const data = await res.json();
-
-    listaEventosConfirmados.innerHTML = '';
 
     if (!Array.isArray(data) || data.length === 0) {
       listaEventosConfirmados.innerHTML = `<p style="text-align:center;color:#777;">Nenhum evento confirmado ainda.</p>`;
       return;
     }
 
-    data.forEach(evento => {
-      const dataFormatada = evento.dt_evento
-        ? new Date(evento.dt_evento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
-        : '-';
+    sessionStorage.setItem('eventos_confirmados', JSON.stringify(data)); // salva no cache
+    renderizarEventosConfirmados(data);
 
-      const item = document.createElement('div');
-      item.classList.add('event-item');
-      item.innerHTML = `
-        <div>
-          <strong>${evento.nome_evento}</strong><br>
-          <small>${dataFormatada} - ${evento.cidade || 'Local não informado'}</small>
-        </div>
-        <button>Cancelar Presença</button>
-      `;
-
-      item.querySelector('button').addEventListener('click', async () => {
-        if (confirm(`Deseja realmente cancelar a presença no evento "${evento.nome_evento}"?`)) {
-          await cancelarPresenca(evento.cod_evento);
-          item.remove();
-          window.location.reload()
-        }
-      });
-
-      listaEventosConfirmados.appendChild(item);
-    });
   } catch (err) {
     console.error('Erro ao buscar eventos confirmados:', err);
     listaEventosConfirmados.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar eventos.</p>';
@@ -446,4 +429,60 @@ function abrirModalPerfil() {
 function fecharModalPerfil() {
   const modal = document.getElementById("profileModal");
   if (modal) modal.style.display = "none";
+}
+
+
+// Função auxiliar para salvar evento confirmado no sessionStorage
+function salvarEventoConfirmadoSession(evento) {
+  const key = 'eventos_confirmados';
+  const existentes = JSON.parse(sessionStorage.getItem(key) || '[]');
+
+  // Evita duplicatas
+  const jaExiste = existentes.some(e => e.cod_evento === evento.cod_evento);
+  if (!jaExiste) {
+    existentes.push({
+      cod_evento: evento.cod_evento,
+      nome_evento: evento.nome_evento,
+      dt_evento: evento.dt_evento,
+      cidade: evento.cidade,
+    });
+    sessionStorage.setItem(key, JSON.stringify(existentes));
+  }
+}
+
+function renderizarEventosConfirmados(lista) {
+  listaEventosConfirmados.innerHTML = '';
+
+  lista.forEach(evento => {
+    const dataFormatada = evento.dt_evento
+      ? new Date(evento.dt_evento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+      : '-';
+
+    const item = document.createElement('div');
+    item.classList.add('event-item');
+    item.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+        <div>
+          <strong>${evento.nome_evento}</strong>
+          <small>${dataFormatada} · ${evento.cidade || 'Local não informado'}</small>
+        </div>
+        <button>Cancelar Presença</button>
+      </div>
+    `;
+
+    item.querySelector('button').addEventListener('click', async () => {
+      if (confirm(`Deseja realmente cancelar a presença no evento "${evento.nome_evento}"?`)) {
+        await cancelarPresenca(evento.cod_evento);
+
+        // Remove do sessionStorage também
+        const cache = JSON.parse(sessionStorage.getItem('eventos_confirmados') || '[]');
+        const atualizado = cache.filter(e => e.cod_evento !== evento.cod_evento);
+        sessionStorage.setItem('eventos_confirmados', JSON.stringify(atualizado));
+
+        item.remove();
+      }
+    });
+
+    listaEventosConfirmados.appendChild(item);
+  });
 }

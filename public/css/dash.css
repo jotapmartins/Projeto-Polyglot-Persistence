@@ -296,9 +296,7 @@ body {
 
 /* NOVO: DASHBOARD GRID LAYOUT */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 350px; /* Coluna principal e sidebar de atividade */
-  gap: 2rem;
+  width: 100%;
 }
 .main-content {
   display: flex;
