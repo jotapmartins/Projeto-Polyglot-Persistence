@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Estabelecimento - EventFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/@phosphor-icons/web" rel="stylesheet">
+  <link rel="stylesheet" href="/public/css/dash.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" id="menuToggle"><i class="ph ph-list"></i></button>
+      <a href="#" class="logo"><i class="ph-fill ph-buildings"></i> Painel da Empresa</a>
+    </div>
+
+    <div class="header-right">
+      <div class="user-actions">
+        <button class="empresa-btn" onclick="abrirAreaCliente()">Área do Cliente</button>
+        <i class="ph ph-heart"></i>
+        <i id="profileIcon" class="ph ph-user-circle"></i>
+      </div>
+
+      <div class="user-profile" id="userProfile">
+        <img src="https://static.vecteezy.com/ti/vetor-gratis/p1/5911374-empresario-pessoa-icone-empresario-avatar-usuario-menino-gratis-vetor.jpg" alt="User">
+        <span>Olá, Admin</span>
+        <i class="ph ph-caret-down"></i>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="#" id="btnEditarPerfilDropdown"><i class="ph ph-user-circle"></i> Editar Perfil</a>
+          <a href="#" id="logoutBtn"><i class="ph ph-sign-out"></i> Sair</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Ações</h2>
+      <button class="close-menu" id="closeMenu"><i class="ph ph-x"></i></button>
+    </div>
+    <nav>
+      <a href="#" id="btnCriarEvento"><i class="ph ph-calendar-plus"></i> Criar Evento</a>
+    </nav>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-container">
+    <section class="content">
+      <div class="dashboard-grid">
+        <div class="event-list-section">
+          <div class="event-list-header">
+            <h3>Meus Eventos</h3>
+            <div class="filter-controls">            
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="event-table">
+              <thead>
+                <tr>
+                  <th>Evento</th>
+                  <th>Data</th>
+                  <th>Hr Inicio</th>
+                  <th>Hr fim</th>
+                  <th>Limite Pessoas</th>
+                  <th>Cidade</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="eventList"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL CRIAR EVENTO -->
+  <div class="modal-overlay" id="modalCriarEvento" >
+    <div class="modal-content" >
+      <div class="modal-header" >
+        <h2><i class="ph ph-calendar-plus"></i> Criar Novo Evento</h2>
+        <button class="modal-close"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEvento" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="nome_evento">Nome do Evento *</label>
+            <input type="text" id="nome_evento" name="nome_evento" required>
+          </div>
+
+          <div class="form-group">
+            <label for="end_evento">Endereço *</label>
+            <input type="text" id="end_evento" name="end_evento" required>
+          </div>
+
+          <div class="form-group">
+            <label for="nome_local_evento">Nome do Local *</label>
+            <input type="text" id="nome_local_evento" name="nome_local_evento" required>
+          </div>
+
+          <div class="linha">
+            <div class="form-group">
+              <label for="limite_pessoas">Limite de Pessoas *</label>
+              <input type="number" id="limite_pessoas" name="limite_pessoas" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="limite_pessoas">Valor Ingresso *</label>
+              <input type="text" id="vl_ingresso" name="vl_ingresso"  required>
+            </div>
+          </div>
+          <div class="linha">
+            <div class="form-group">
+              <label for="dt_evento">Data do Evento *</label>
+              <input type="date" id="dt_evento" name="dt_evento" required>
+            </div>
+            <div class="form-group">
+              <label for="dt_evento">Cidade</label>
+              <select id="cidade" name="cidade" required>
+                <option>São Paulo</option>
+                <option>Rio de Janeiro</option>
+                <option>Belo Horizonte</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dt_evento">Link Imagem</label>
+              <input type="text" id="link_imagem" name="link_imagem" required>
+            </div>
+            
+          </div>
+
+          <div class="linha">
+            <div class="form-group">
+              <label for="hr_inicio_evento">Horário de Início *</label>
+              <input type="time" id="hr_inicio_evento" name="hr_inicio_evento" required>
+            </div>
+            <div class="form-group">
+              <label for="hr_fim_evento">Horário de Término *</label>
+              <input type="time" id="hr_fim_evento" name="hr_fim_evento" required>
+            </div>
+          </div>
+
+          <!-- <div class="form-group">
+            <label for="link_doc_img">Imagem do Evento *</label>
+            <input type="file" id="link_doc_img" name="link_doc_img" accept="image/*" required>
+          </div> -->
+
+          <button type="submit" class="btn-submit">
+            <i class="ph ph-check-circle"></i> Cadastrar Evento
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalEditarPerfil"></div>
+
+  <!-- SCRIPTS -->
+  <script src="/public/js/Empresas/dash.js"></script>
+  <script src="/public/auth.js"></script>
+
+</body>
+</html>

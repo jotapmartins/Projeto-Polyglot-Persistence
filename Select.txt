@@ -1,0 +1,17 @@
+ABRIR BD:
+USE eventflow_db;
+
+-------------------------------------------------------------
+
+VER DADOS INSERIDOS:
+SELECT * FROM eventflow_db.eventos;
+
+-------------------------------------------------------------
+
+VER DADOS INSERIDOS EM JSON:
+SELECT JSON * FROM eventflow_db.eventos;
+
+-------------------------------------------------------------
+
+DELETAR DADOS
+DELETE FROM eventflow_db.eventos WHERE cod_empresa = ? AND cod_evento = ?;

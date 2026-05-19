@@ -1,0 +1,121 @@
+:root {
+  --primary-color: #6a11cb;
+  --secondary-color: #2575fc;
+  --dark-bg: #121212;
+  --card-bg: #1e1e1e;
+  --text-primary: #fff;
+  --text-secondary: #bbb;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  width: 100%;
+  background-color: var(--card-bg);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* FORM */
+.form-container {
+  margin-top: 3rem;
+  background-color: var(--card-bg);
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  width: 96%;
+  max-width: 600px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+}
+
+label {
+  margin-bottom: 0.4rem;
+  color: var(--text-secondary);
+}
+
+input {
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #2a2a2a;
+  color: white;
+}
+
+input:focus {
+  outline: 2px solid var(--secondary-color);
+}
+
+.form-inline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.btn-enviar {
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1rem;
+  transition: 0.3s ease;
+}
+
+.btn-enviar:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  .form-inline {
+    flex-direction: column;
+  }
+}
+
+.linha{
+    display: flex;
+    gap: 15px;
+}
